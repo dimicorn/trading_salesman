@@ -68,10 +68,10 @@ public:
             }
             std::reverse(cycle.begin(), cycle.end());
         }
-        return std::make_pair(result_cost, cycle);  // The state corresponding to having traversed the cycle
+        return std::make_pair(result_cost, cycle);
     }
     std::pair<double, std::vector<int> > ant_colony(
-        const int &iterations = 10, const int &ants_per_iter = 5,
+        const int &iterations = 100, const int &ants_per_iter = 50,
         const int &q = 10, const double &degradation_factor = 0.9
     ) {
         std::random_device rd;
@@ -120,8 +120,7 @@ public:
         double total_length = 0;
         std::default_random_engine generator;
         while (steps < num_vertices - 1) {
-            std::vector<double> jump_neighbors;
-            std::vector<double> jump_values;
+            std::vector<double> jump_neighbors, jump_values;
             for (int node = 0; node < num_vertices; ++node) {
                 if (visited[node] != 0) {
                     double pheromone_level = fmax(intensity[current][node], 1e-5);
@@ -132,8 +131,8 @@ public:
             }
             std::discrete_distribution<int> distribution(jump_values.begin(), jump_values.end());
             int next_node = distribution(generator);
-            visited[next_node] = 0;
-            current = next_node;
+            visited[jump_neighbors[next_node]] = 0;
+            current = jump_neighbors[next_node];
             cycle.push_back(current);
             ++steps;
         }
@@ -151,7 +150,7 @@ public:
 
 private:
     std::vector<std::vector<double> > adj_matrix, min_path, intensity;
-    std::vector<std::vector<int> >min_path_last_vertex;
+    std::vector<std::vector<int> > min_path_last_vertex;
     int num_vertices;
     double alpha = 0.9, beta = 1.5;
     const double MAX = std::numeric_limits<double>::max();
@@ -184,9 +183,18 @@ int main(int argc, char** argv) {
     }
 
     Graph g = Graph(edges, vertices);
-    auto res = g.ant_colony();
-    std::cout << std::setprecision(15) << std::scientific << res.first << '\n';
-    for (const auto &it: res.second)
+
+    auto [length, cycle] = g.ant_colony();
+    std::cout << "Ant Colony Optimization Result:\n";
+    std::cout << length << '\n';
+    for (const auto &it: cycle)
+        std::cout << it << ' ';
+    std::cout << '\n';
+    // return 0;
+    std::tie(length, cycle) = g.held_karp();
+    std::cout << "\nHeld-Karp Algorithm Result:\n";
+    std::cout << length << '\n';
+    for (const auto &it: cycle)
         std::cout << it << ' ';
     std::cout << '\n';
     return 0;
