@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     std::string input_file = argv[1];
     std::vector<std::pair<double, double> > dots = parse(input_file);
     int vertices = dots.size();
-    std::cout << "Number of vertices: " << vertices << '\n';
+    std::cout << std::format("Number of vertices: {}\n", vertices);
     std::vector<Edge> edges;
     for (int i = 0; i < vertices; ++i) {
         for (int j = i+1; j < vertices; ++j) {
